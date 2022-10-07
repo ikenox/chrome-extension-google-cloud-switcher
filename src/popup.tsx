@@ -1,50 +1,37 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import { ConsolePage, Searcher, getSearcher } from "./search";
 
 const Popup = () => {
-  const [count, setCount] = useState(0);
-  const [currentURL, setCurrentURL] = useState<string>();
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<ConsolePage[]>([]);
+  const [searcher, setSearcher] = useState<Searcher | undefined>(undefined);
 
   useEffect(() => {
-    chrome.action.setBadgeText({ text: count.toString() });
-  }, [count]);
+    console.log(`query: ${query}`);
+    const results = searcher?.query(query) ?? [];
+    setResults(results);
+  }, [query, searcher]);
 
   useEffect(() => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      setCurrentURL(tabs[0].url);
-    });
+    (async () => {
+      setSearcher(await getSearcher());
+    })();
   }, []);
-
-  const changeBackground = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const tab = tabs[0];
-      if (tab.id) {
-        chrome.tabs.sendMessage(
-          tab.id,
-          {
-            color: "#555555",
-          },
-          (msg) => {
-            console.log("result message:", msg);
-          }
-        );
-      }
-    });
-  };
 
   return (
     <>
-      <ul style={{ minWidth: "700px" }}>
-        <li>Current URL: {currentURL}</li>
-        <li>Current Time: {new Date().toLocaleTimeString()}</li>
-      </ul>
-      <button
-        onClick={() => setCount(count + 1)}
-        style={{ marginRight: "5px" }}
-      >
-        count up
-      </button>
-      <button onClick={changeBackground}>change background</button>
+      <input
+        onChange={(e) => setQuery(e.target.value)}
+        type={"text"}
+        autoFocus={true}
+        style={{ minWidth: "400px" }}
+      />
+      {results.map((p, i) => (
+        <div key={i}>
+          {p.projectId} {p.name} {p.url}
+        </div>
+      ))}
     </>
   );
 };
