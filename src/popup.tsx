@@ -9,8 +9,7 @@ const Popup = () => {
 
   useEffect(() => {
     console.log(`query: ${query}`);
-    const results = searcher?.query(query) ?? [];
-    setResults(results);
+    setResults(searcher?.query(query, 5) ?? []);
   }, [query, searcher]);
 
   useEffect(() => {
@@ -21,17 +20,80 @@ const Popup = () => {
 
   return (
     <>
-      <input
-        onChange={(e) => setQuery(e.target.value)}
-        type={"text"}
-        autoFocus={true}
-        style={{ minWidth: "400px" }}
-      />
-      {results.map((p, i) => (
-        <div key={i}>
-          {p.projectId} {p.name} {p.url}
+      <div
+        style={{
+          width: "500px",
+          fontFamily: "Roboto",
+          letterSpacing: ".3px",
+          fontSize: "12px",
+          lineHeight: "16px",
+          fontWeight: 400,
+          color: "#202124",
+        }}
+      >
+        <div
+          style={{
+            marginLeft: "16px",
+            marginRight: "16px",
+          }}
+        >
+          <input
+            onChange={(e) => setQuery(e.target.value)}
+            type={"text"}
+            autoFocus={true}
+            placeholder={"GCP project ID and/or GCP Product name"}
+            style={{
+              paddingLeft: "0",
+              paddingRight: "0",
+              height: "36px",
+              outline: "none",
+              border: "none",
+              width: "100%",
+              fontFamily: "Roboto",
+              letterSpacing: ".2px",
+              fontSize: "14px",
+              lineHeight: "20px",
+            }}
+          />
         </div>
-      ))}
+        <div
+          style={{ borderTop: "1px solid", borderTopColor: "rgba(0,0,0,0.08)" }}
+        >
+          {results.map((p, i) => (
+            <div
+              key={i}
+              style={{
+                minHeight: "48px",
+                display: "flex",
+                justifyContent: "center",
+                flexDirection: "column",
+                paddingLeft: "16px",
+                paddingRight: "16px",
+              }}
+            >
+              <div
+                style={{
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  letterSpacing: ".2px",
+                  fontSize: "14px",
+                  lineHeight: "20px",
+                }}
+              >
+                {p.name}
+              </div>
+              <div
+                style={{
+                  color: "#5f6368",
+                }}
+              >
+                {p.projectId}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </>
   );
 };
