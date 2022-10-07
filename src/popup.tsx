@@ -27,12 +27,14 @@ const Popup = () => {
       setSelectedIndex(Math.max(0, selectedIndex - 1));
     } else if (e.key === "ArrowDown") {
       setSelectedIndex(Math.min(results.length - 1, selectedIndex + 1));
-    } else if (
-      e.key === "Enter" &&
-      !e.nativeEvent.isComposing &&
-      selectedIndex !== undefined
-    ) {
-      await chrome.tabs.create({ url: results[selectedIndex].url });
+    } else if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+      await openSelectedPage(results[selectedIndex]);
+    }
+  };
+
+  const openSelectedPage = async (p: ConsolePage) => {
+    if (selectedIndex !== undefined) {
+      await chrome.tabs.create({ url: p.url });
     }
   };
 
@@ -59,7 +61,7 @@ const Popup = () => {
             onChange={(e) => setQuery(e.target.value)}
             type={"text"}
             autoFocus={true}
-            placeholder={"GCP project ID, Product name"}
+            placeholder={"GCP project ID, product"}
             style={{
               paddingLeft: "0",
               paddingRight: "0",
@@ -94,6 +96,7 @@ const Popup = () => {
                   selectedIndex == i ? "rgba(0,0,0,0.04)" : "white",
               }}
               onMouseMove={() => setSelectedIndex(i)}
+              onClick={() => openSelectedPage(p)}
             >
               <div
                 style={{
