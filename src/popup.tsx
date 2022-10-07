@@ -12,7 +12,7 @@ const Popup = () => {
     console.log(`query: ${query}`);
     const result = searcher?.query(query, 8) ?? [];
     setResults(result);
-    setSelectedIndex(Math.min(selectedIndex, result.length));
+    setSelectedIndex(0);
   }, [query, searcher]);
 
   useEffect(() => {
@@ -20,6 +20,21 @@ const Popup = () => {
       setSearcher(await getSearcher());
     })();
   }, []);
+
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    console.log("key: ", e.key);
+    if (e.key === "ArrowUp") {
+      setSelectedIndex(Math.max(0, selectedIndex - 1));
+    } else if (e.key === "ArrowDown") {
+      setSelectedIndex(Math.min(results.length - 1, selectedIndex + 1));
+    } else if (
+      e.key === "Enter" &&
+      !e.nativeEvent.isComposing &&
+      selectedIndex !== undefined
+    ) {
+      await chrome.tabs.create({ url: results[selectedIndex].url });
+    }
+  };
 
   return (
     <>
@@ -44,7 +59,7 @@ const Popup = () => {
             onChange={(e) => setQuery(e.target.value)}
             type={"text"}
             autoFocus={true}
-            placeholder={"GCP project ID and/or GCP Product name"}
+            placeholder={"GCP project ID, Product name"}
             style={{
               paddingLeft: "0",
               paddingRight: "0",
@@ -58,6 +73,7 @@ const Popup = () => {
               fontSize: "14px",
               lineHeight: "20px",
             }}
+            onKeyDown={handleKeyDown}
           />
         </div>
         <div
@@ -67,6 +83,7 @@ const Popup = () => {
             <div
               key={i}
               style={{
+                cursor: "pointer",
                 minHeight: "48px",
                 display: "flex",
                 justifyContent: "center",
@@ -76,7 +93,7 @@ const Popup = () => {
                 backgroundColor:
                   selectedIndex == i ? "rgba(0,0,0,0.04)" : "white",
               }}
-              onMouseEnter={() => setSelectedIndex(i)}
+              onMouseMove={() => setSelectedIndex(i)}
             >
               <div
                 style={{
