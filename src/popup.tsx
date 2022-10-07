@@ -6,10 +6,13 @@ const Popup = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ConsolePage[]>([]);
   const [searcher, setSearcher] = useState<Searcher | undefined>(undefined);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   useEffect(() => {
     console.log(`query: ${query}`);
-    setResults(searcher?.query(query, 5) ?? []);
+    const result = searcher?.query(query, 8) ?? [];
+    setResults(result);
+    setSelectedIndex(Math.min(selectedIndex, result.length));
   }, [query, searcher]);
 
   useEffect(() => {
@@ -50,6 +53,7 @@ const Popup = () => {
               border: "none",
               width: "100%",
               fontFamily: "Roboto",
+              fontWeight: 400,
               letterSpacing: ".2px",
               fontSize: "14px",
               lineHeight: "20px",
@@ -69,7 +73,10 @@ const Popup = () => {
                 flexDirection: "column",
                 paddingLeft: "16px",
                 paddingRight: "16px",
+                backgroundColor:
+                  selectedIndex == i ? "rgba(0,0,0,0.04)" : "white",
               }}
+              onMouseEnter={() => setSelectedIndex(i)}
             >
               <div
                 style={{
