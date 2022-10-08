@@ -23,9 +23,16 @@ export class ConsolePage {
 
   detailPart(): string {
     const keyValues = chunk(this.url.pathname.split("/").slice(2), 2);
-    return keyValues
-      .map((kv) => `${kv[0]}${kv.length == 2 ? ":" + kv[1] : ""}`)
-      .join(" ");
+    return (
+      keyValues
+        .map((kv) => `${kv[0]}${kv.length == 2 ? "=" + kv[1] : ""}`)
+        .join(" ") +
+      " " +
+      [...this.url.searchParams.entries()]
+        .filter((kv) => kv[0] != "project")
+        .map((kv) => `${kv[0]}=${kv[1]}`)
+        .join(" ")
+    );
   }
 }
 
