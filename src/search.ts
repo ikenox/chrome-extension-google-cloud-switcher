@@ -4,12 +4,28 @@ export class ConsolePage {
   constructor(
     readonly projectId: GcpProjectId,
     readonly name: string,
-    readonly url: string,
+    readonly url: URL,
     readonly lastVisitTime: number
   ) {}
 
   favicon(): string {
     return `chrome://favicon/${this.url}`;
+  }
+
+  displayName(): string {
+    const splitted = this.name.split(` – ${this.projectId}`);
+    if (splitted.length > 0) {
+      const elems = splitted[0].split(" – ");
+      return elems.reverse().join(" | ");
+    }
+    return this.name;
+  }
+
+  detailPart(): string {
+    const keyValues = chunk(this.url.pathname.split("/").slice(2), 2);
+    return keyValues
+      .map((kv) => `${kv[0]}${kv.length == 2 ? ":" + kv[1] : ""}`)
+      .join(" ");
   }
 }
 
@@ -22,6 +38,8 @@ export function doSearch(): Promise<ConsolePage[]> {
       (data) => {
         const results = data
           .filter((p) => p.url?.startsWith(googleCloudUrl) ?? false)
+          // どのページもロード時に一旦この名前になり、その後切り替わる
+          .filter((p) => p.title !== "Google Cloud console")
           .map((p) => {
             const url = new URL(p.url!);
             const projectId = url.searchParams.get("project") ?? "";
@@ -29,7 +47,7 @@ export function doSearch(): Promise<ConsolePage[]> {
             return new ConsolePage(
               projectId,
               p.title ?? "",
-              p.url!,
+              url,
               p.lastVisitTime ?? 0
             );
           });
@@ -57,7 +75,7 @@ export class Searcher {
     const splitted = text.split(" ").filter((s) => s !== "");
     return this.candidates
       .filter((p) => {
-        let concat = `${p.projectId} ${p.name}`;
+        let concat = `${p.projectId} ${p.name} ${p.url.toString()}`;
         if (!caseSensitive) {
           concat = concat.toLowerCase();
         }
@@ -71,4 +89,11 @@ export class Searcher {
       })
       .slice(0, limit);
   }
+}
+
+function chunk<T extends any[]>(arr: T, size: number): T[][] {
+  return arr.reduce(
+    (newarr, _, i) => (i % size ? newarr : [...newarr, arr.slice(i, i + size)]),
+    [] as T[][]
+  );
 }

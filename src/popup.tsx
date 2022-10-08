@@ -34,7 +34,7 @@ const Popup = () => {
 
   const openSelectedPage = async (p: ConsolePage) => {
     if (selectedIndex !== undefined) {
-      await chrome.tabs.create({ url: p.url });
+      await chrome.tabs.create({ url: p.url.toString() });
     }
   };
 
@@ -42,7 +42,7 @@ const Popup = () => {
     <>
       <div
         style={{
-          width: "500px",
+          width: "700px",
           fontFamily: "Roboto",
           letterSpacing: ".3px",
           fontSize: "12px",
@@ -61,7 +61,7 @@ const Popup = () => {
             onChange={(e) => setQuery(e.target.value)}
             type={"text"}
             autoFocus={true}
-            placeholder={"GCP project ID, product"}
+            placeholder={"GCP project ID, product, resource"}
             style={{
               paddingLeft: "0",
               paddingRight: "0",
@@ -108,14 +108,17 @@ const Popup = () => {
                   lineHeight: "20px",
                 }}
               >
-                {p.name}
+                {p.displayName()}
               </div>
               <div
                 style={{
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
                   color: "#5f6368",
                 }}
               >
-                {p.projectId}
+                {p.projectId} {p.detailPart()}
               </div>
             </div>
           ))}
